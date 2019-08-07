@@ -2,53 +2,77 @@ public class ByteManager{
 
 	static private int flag;
 
-	static int[] slice(byte b){
+	static
+	{
 
-		int[] res = new int[3];
+		flag = 0;
+	}
+
+	static int[] modify(byte b,int[] originalBytes){
 
 		if(flag == 0){
 
-			res[0] = b&3;
+			originalBytes[0]>>=2;
+			originalBytes[0]<<=2;
+			originalBytes[0] |= b&3;
 			b >>= 2;
 
-			res[1] = b&7;
+			originalBytes[1]>>=3;
+			originalBytes[1]<<=3;
+			originalBytes[1] |= b&7;
 			b >>= 3;
 
-			res[2] = b&7;
+			originalBytes[2]>>=3;
+			originalBytes[2]<<=3;
+			originalBytes[2] |= b&7;
 			b >>= 3;
 
 		}
 
 		else if(flag == 1){
 
-			res[0] = b&7;
+			originalBytes[0]>>=3;
+			originalBytes[0]<<=3;
+			originalBytes[0] |= b&7;
 			b >>= 3;
 
-			res[1] = b&3;
+			originalBytes[1]>>=2;
+			originalBytes[1]<<=2;
+			originalBytes[1] |= b&3;
 			b >>= 2;
 
-			res[2] = b&7;
+			originalBytes[2]>>=3;
+			originalBytes[2]<<=3;
+			originalBytes[2] |= b&7;
 			b >>= 3;
 
 		}
 
 		else {
 
-			res[0] = b&7;
+			originalBytes[0]>>=3;
+			originalBytes[0]<<=3;
+			originalBytes[0] |= b&7;
 			b >>= 3;
 
-			res[1] = b&7;
+			originalBytes[1]>>=3;
+			originalBytes[1]<<=3;
+			originalBytes[1] |= b&7;
 			b >>= 3;
 
-			res[2] = b&3;
+			originalBytes[2]>>=2;
+			originalBytes[2]<<=2;
+			originalBytes[2] |= b&3;
 			b >>= 2;
+
 
 		}
 
 		flag = (flag+1)%3;
 
-		return res;
+		return originalBytes;
 	}
+
 
 	public static int patchUp(int[] arg){
 
@@ -78,6 +102,11 @@ public class ByteManager{
 
 		ByteManager.flag = flag%3;
 
+	}
+
+	static int getFlag(){
+
+		return ByteManager.flag;
 	}
 
 }
