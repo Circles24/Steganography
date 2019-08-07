@@ -2,8 +2,8 @@ import java.io.File;
 
 public class HeaderManager{
 
-	private static final char DISCRIMINATOR = '~';
-	private static final int HEADER_LEANGTH = 50;
+	private static final char DISCRIMINATOR = '^';
+	private static final int HEADER_LENGTH = 50;
 	private static final int NAME_LENGTH = 40; 
 	private static final int SIZE_LENGTH = 9; 
 
@@ -32,6 +32,11 @@ public class HeaderManager{
 
 
 		return Integer.parseInt(((Header.substring((Header.indexOf(DISCRIMINATOR)+1))).replaceAll("_"," ")).trim());
+	}
+
+	public static int getHeaderLength(){
+
+		return HeaderManager.HEADER_LENGTH;
 	}
 
 
