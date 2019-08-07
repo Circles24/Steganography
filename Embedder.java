@@ -1,8 +1,9 @@
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
 import java.util.Scanner;
 import java.io.File;
 import javax.imageio.ImageIO;
+import java.io.FileInputStream;
 
 class Embedder 
 {
@@ -10,6 +11,7 @@ class Embedder
 	private File vessel;
 	private File msgFile;
 	private File outFile;
+	private byte[] buff;
 
 	public Embedder(File vessel,File msgFile,File outFile)throws Exception
 	{
@@ -20,68 +22,86 @@ class Embedder
 		this.vessel = vessel;
 		this.msgFile = msgFile;
 		this.outFile = outFile;
+		this.buff = new byte[1024];
 
 	}
 
-	public  boolean embedd(){
+	public  void embedd()throws Exception
+	{
 
-		try{
+		boolean finished = false;
+		int slices[],n=0,k=0;
+		ByteManager.setFlag(0);
+		int R=0,G=0,B=0;
+		int updatedBytes[];
 
-			BufferedImage vesselImage = ImageIO.read(vessel);
+		FileInputStream fin = new FileInputStream(vessel);
+		BufferedImage vesselImage = ImageIO.read(vessel);
 
-			int vesselWidth = vesselImage.getWidth();
-       		int vesselHeight = vesselImage.getHeight();
+		int vesselWidth = vesselImage.getWidth();
+   		int vesselHeight = vesselImage.getHeight();
 
-       		if(vesselHeight*vesselWidth < msgFile.length()+HeaderManager.getHeaderLength())throw new Exception("insufficient Size");
+   		if(vesselHeight*vesselWidth < msgFile.length()+HeaderManager.getHeaderLength())throw new Exception("insufficient Size");
 
-       		int slices[] = new int[3];
+   		WritableRaster raster = vesselImage.getRaster();
 
-       		Raster raster = vesselImage.getData();
+        for (int i = 0; i < vesselWidth; i++) {
+            for (int j = 0; j < vesselHeight; j++) {
+				
+				if(k == n){
 
-	        for (int i = 0; i < vesselWidth; i++) {
-	            for (int j = 0; j < vesselHeight; j++) {
-	               	
-	            	slices = HeaderManager.Slices(data);
+					n = fin.read(buff);
+					k = 0;
+				}
 
-	            	raster.setSample(i,j,0,R);
+				if(n == -1){
 
-	            }
-	        }
+					finished= true;
+					break;
+				}
+
+				updatedBytes = ByteManager.modify(buff[k],new int[]{raster.getSample(i,j,0),raster.getSample(i,j,1),raster.getSample(i,j,2)});
+
+				raster.setSample(i,j,0,updatedBytes[0]);
+				raster.setSample(i,j,1,updatedBytes[1]);
+				raster.setSample(i,j,2,updatedBytes[2]);
 
 
-		}
+            }
 
-		catch(Exception ex){
+            if(finished)break;
+        }
 
-			System.out.println(ex.getMessage());
 
-			return false;
+		vesselImage.setData(raster);
+		ImageIO.write(vesselImage,"jpg",outFile);   
 
-		}
+		System.out.println("done with emedding");     
 
-		return true;
 	}
 
+	
 	public static void main(String args[]){
 
-		Scanner scn = new Scanner(System.in);
-
 		try{
 
-			File vessel = new File(scn.nextLine());
-			File msgFile = new File(scn.nextLine());
-			File outFile = new File(scn.nextLine());
+			File vessel = new File(args[0]);
+			File dataFile = new File(args[1]);
+			File outputFile = new File(args[2]);
 
-			Embedder embd = new Embedder(vessel,msgFile,outFile);
-			embd.embedd();
+			new Embedder(vessel,dataFile,outputFile).embedd();
 
+		}
+
+		catch(ArrayIndexOutOfBoundsException ex ){
+
+			System.out.println("Usage java Embedder <vesselImage> <dataFile> <OutputImage> ");
 		}
 
 		catch(Exception ex){
 
-			System.out.println("Some Exception occured");
 			System.out.println(ex.getMessage());
 		}
-
+		
 	}
 }
