@@ -1,114 +1,68 @@
-public class ByteManager{
+public class ByteManager {
 
-	static private int flag;
+	static private int flag = 0;
+	static private ByteEmbedderPatternStrategy patternStrategy;
 
-	static
-	{
-
+	static {
 		flag = 0;
+		patternStrategy = ByteEmbedderPatternStrategy.KEEP_SAME;
 	}
 
-	static int[] modify(int b,int[] originalBytes){
+	private static void updateFlag() {
+		if(patternStrategy == ByteEmbedderPatternStrategy.INCREMENTAL_1) {
+			flag = (flag+1)%3;
+		} else if(patternStrategy == ByteEmbedderPatternStrategy.INCREMENTAL_2) {
+			flag = (flag+2)%3;
+		}
+	}
 
-		if(flag == 0){
+	static int[] embedAlienData(int alienData,int[] nativeData){
 
-			originalBytes[0]>>=2;
-			originalBytes[0]<<=2;
-			originalBytes[0] |= (b&3);
-			b >>= 2;
+		int noOfBytesToEmbed;
 
-			originalBytes[1]>>=3;
-			originalBytes[1]<<=3;
-			originalBytes[1] |= (b&7);
-			b >>= 3;
-
-			originalBytes[2]>>=3;
-			originalBytes[2]<<=3;
-			originalBytes[2] |= (b&7);
-			b >>= 3;
-
+		for(int i=0;i<3;i++) {
+			noOfBytesToEmbed = (i==flag)?2:3;
+			nativeData[i] >>= noOfBytesToEmbed;
+			nativeData[i] <<= noOfBytesToEmbed;
+			nativeData[i] |= (alienData&(1<<(noOfBytesToEmbed+1))-1);
+			alienData >>= noOfBytesToEmbed;
 		}
 
-		else if(flag == 1){
+		updateFlag();
 
-			originalBytes[0]>>=3;
-			originalBytes[0]<<=3;
-			originalBytes[0] |= (b&7);
-			b >>= 3;
-
-			originalBytes[1]>>=2;
-			originalBytes[1]<<=2;
-			originalBytes[1] |= (b&3);
-			b >>= 2;
-
-			originalBytes[2]>>=3;
-			originalBytes[2]<<=3;
-			originalBytes[2] |= (b&7);
-			b >>= 3;
-
-		}
-
-		else {
-
-			originalBytes[0]>>=3;
-			originalBytes[0]<<=3;
-			originalBytes[0] |= (b&7);
-			b >>= 3;
-
-			originalBytes[1]>>=3;
-			originalBytes[1]<<=3;
-			originalBytes[1] |= (b&7);
-			b >>= 3;
-
-			originalBytes[2]>>=2;
-			originalBytes[2]<<=2;
-			originalBytes[2] |= (b&3);
-			b >>= 2;
-
-
-		}
-
-		// flag = (flag+1)%3;
-
-		return originalBytes;
+		return nativeData;
 	}
 
 
-	public static int patchUp(int[] arg){
+	public static int getAlienData(int[] arg){
 
-		int res = 0;
+		int extractedData = 0, bytesAddedTillNow = 0, noOfBytesToAdd;
 
-		if(flag == 0){
-
-			res = ((arg[2]&7)<<5 ) | ((arg[1]&7)<<2 ) | ((arg[0])&3)  ;
+		for(int i=0;i<3;i++) {
+			noOfBytesToAdd = (flag == i)?2:3;
+			extractedData |= (arg[i]&((1<<noOfBytesToAdd))-1) << bytesAddedTillNow;
+			bytesAddedTillNow += noOfBytesToAdd;
 		}
 
-		else if(flag == 0){
+		updateFlag();
 
-			res = ((arg[2]&7) << 5 ) | ((arg[1]&3) << 3 ) | ((arg[0])&7) ;
-
-		}
-
-		else{
-
-			res = ((arg[2]&3) << 6 ) | ((arg[1]&7) << 3 ) | ((arg[0])&7) ;
-
-		}
-
-		// flag = (flag+1)%3;
-
-		return res;
+		return extractedData;
 	}
 
-	static public void setFlag(int flag){
-
-		ByteManager.flag = flag%3;
-
+	public static void setFlag(int flag) {
+		ByteManager.flag = flag % 3;
 	}
 
-	static int getFlag(){
-
+	public static int getFlag(){
 		return ByteManager.flag;
+	}
+
+	public static void setPatternStrategy(ByteEmbedderPatternStrategy newPatternStrategy) {
+		patternStrategy = newPatternStrategy;
+	}
+
+	public static ByteEmbedderPatternStrategy getPatternStrategy() {
+		return patternStrategy;
 	}
 
 }

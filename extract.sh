@@ -4,4 +4,4 @@ echo "running the extractor"
 
 read -p "enter input file address  " inputFileAddress
 
-java -cp ~/prj/Steganography/build/ Extractor $inputFileAddress
+java -cp ~/dev/temp/Steganography/build/ Extractor $inputFileAddress

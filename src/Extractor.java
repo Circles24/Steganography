@@ -4,7 +4,7 @@ import java.io.File;
 import javax.imageio.ImageIO;
 import java.io.FileOutputStream;
 
-public class Extractor{
+public class Extractor {
 
 	File inputFile;
 
@@ -12,6 +12,7 @@ public class Extractor{
 	{
 		this.inputFile = inputFile;
 		ByteManager.setFlag(0);
+		ByteManager.setPatternStrategy(ByteEmbedderPatternStrategy.INCREMENTAL_1);
 	}
 
 	public void extract()throws Exception
@@ -44,10 +45,8 @@ public class Extractor{
 					break;
 				}
 
-				headerBuffer[k++] = (byte)ByteManager.patchUp(new int[]{raster.getSample(x,y,0),raster.getSample(x,y,1),raster.getSample(x,y,2)});
+				headerBuffer[k++] = (byte)ByteManager.getAlienData(new int[]{raster.getSample(x,y,0),raster.getSample(x,y,1),raster.getSample(x,y,2)});
 
-				// System.out.print(raster.getSample(x,y,0)+" "+raster.getSample(x,y,1)+" "+raster.getSample(x,y,2)+" ");
-				// System.out.println((char)headerBuffer[k-1]);
 			}
 			if(done)break;
 		}
@@ -80,38 +79,30 @@ public class Extractor{
 					break;
 				}
 
-				data = (byte)ByteManager.patchUp(new int[]{raster.getSample(i,j,0),raster.getSample(i,j,1),raster.getSample(i,j,2)});				
+				data = (byte)ByteManager.getAlienData(new int[]{raster.getSample(i,j,0),raster.getSample(i,j,1),raster.getSample(i,j,2)});
 				fileLengthRemaining--;
 				fout.write(data);
 
 			}
 
-			if(done)break;
+			if(done) {
+				break;
+			}
 		}
 
 		fout.close();
-
 		System.out.println("Done with Extracting");
 		
 	}
 
 	public static void main(String args[]){
-
 		try{
-
 			File inputFile = new File(args[0]);
 			new Extractor(inputFile).extract();
-		}
-
-		catch(ArrayIndexOutOfBoundsException ex){
-
+		} catch(ArrayIndexOutOfBoundsException ex){
 			System.out.println("Usage java Extractor <inputFile>");
-		}
-
-		catch(Exception ex){
-
+		} catch(Exception ex){
 			System.out.println(ex.getMessage());
 		}
 	}
-
 }
