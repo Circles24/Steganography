@@ -8,9 +8,13 @@ public class Extractor {
 
 	File inputFile;
 
-	public Extractor(File inputFile)
+	public Extractor(File inputFile) throws Exception
 	{
 		this.inputFile = inputFile;
+		if(!inputFile.exists())
+		{
+			throw new Exception("input file not found");
+		}
 		ByteManager.setFlag(0);
 		ByteManager.setPatternStrategy(ByteEmbedderPatternStrategy.INCREMENTAL_1);
 	}
@@ -31,7 +35,7 @@ public class Extractor {
 
 		WritableRaster raster = inputImage.getRaster();
 
-		byte[] headerBuffer = new byte[ HeaderManager.getHeaderLength() ];
+		byte[] headerBuffer = new byte[n];
 
 		for(x=0;x<width;x++){
 
@@ -45,9 +49,10 @@ public class Extractor {
 					break;
 				}
 
-				headerBuffer[k++] = (byte)ByteManager.getAlienData(new int[]{raster.getSample(x,y,0),raster.getSample(x,y,1),raster.getSample(x,y,2)});
+				headerBuffer[k++] = (byte)ByteManager.getAlienData(new int[]{raster.getSample(x, y,0),raster.getSample(x, y,1),raster.getSample(x, y,2)});
 
 			}
+
 			if(done)break;
 		}
 
@@ -55,13 +60,16 @@ public class Extractor {
 
 		String header = new String(headerBuffer);
 		System.out.println(header);
-		if(HeaderManager.isHeaderValid(header))System.out.println("Source fIle is verified");
+		if(HeaderManager.isHeaderValid(header))
+		{
+			System.out.println("Source fIle is verified");
+		} else throw new Exception("invalid source file");
 
 		String outFileName = HeaderManager.getName(header);
 		System.out.println("Embedded file "+outFileName+" found ");
 
-		File outFile = new File(outFileName);
-		FileOutputStream fout = new FileOutputStream("images/restoredImage.png");
+		File outFile = new File("images/restored_"+outFileName);
+		FileOutputStream fout = new FileOutputStream(outFile);
 
 		int fileLengthRemaining = HeaderManager.getLength(header);
 		System.out.println("Data hidden :: "+fileLengthRemaining);
@@ -79,10 +87,9 @@ public class Extractor {
 					break;
 				}
 
-				data = (byte)ByteManager.getAlienData(new int[]{raster.getSample(i,j,0),raster.getSample(i,j,1),raster.getSample(i,j,2)});
+				data = (byte)ByteManager.getAlienData(new int[]{raster.getSample(i, j,0),raster.getSample(i, j,1),raster.getSample(i, j,2)});
 				fileLengthRemaining--;
 				fout.write(data);
-
 			}
 
 			if(done) {
@@ -92,7 +99,6 @@ public class Extractor {
 
 		fout.close();
 		System.out.println("Done with Extracting");
-		
 	}
 
 	public static void main(String args[]){

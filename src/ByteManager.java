@@ -16,16 +16,16 @@ public class ByteManager {
 		}
 	}
 
-	static int[] embedAlienData(int alienData,int[] nativeData){
+	static int[] embedAlienData(int alienData, int[] nativeData){
 
-		int noOfBytesToEmbed;
+		int noOfBitToEmbed;
 
 		for(int i=0;i<3;i++) {
-			noOfBytesToEmbed = (i==flag)?2:3;
-			nativeData[i] >>= noOfBytesToEmbed;
-			nativeData[i] <<= noOfBytesToEmbed;
-			nativeData[i] |= (alienData&(1<<(noOfBytesToEmbed+1))-1);
-			alienData >>= noOfBytesToEmbed;
+			noOfBitToEmbed = (i==flag)?2:3;
+			nativeData[i] >>= noOfBitToEmbed;
+			nativeData[i] <<= noOfBitToEmbed;
+			nativeData[i] |= (alienData&(1<<noOfBitToEmbed)-1);
+			alienData >>= noOfBitToEmbed;
 		}
 
 		updateFlag();
@@ -36,12 +36,12 @@ public class ByteManager {
 
 	public static int getAlienData(int[] arg){
 
-		int extractedData = 0, bytesAddedTillNow = 0, noOfBytesToAdd;
+		int extractedData = 0, bitsAddedTillNow = 0, noOfBitsToAdd;
 
 		for(int i=0;i<3;i++) {
-			noOfBytesToAdd = (flag == i)?2:3;
-			extractedData |= (arg[i]&((1<<noOfBytesToAdd))-1) << bytesAddedTillNow;
-			bytesAddedTillNow += noOfBytesToAdd;
+			noOfBitsToAdd = (flag == i)?2:3;
+			extractedData |= (arg[i]&(1<<noOfBitsToAdd)-1) << bitsAddedTillNow;
+			bitsAddedTillNow += noOfBitsToAdd;
 		}
 
 		updateFlag();

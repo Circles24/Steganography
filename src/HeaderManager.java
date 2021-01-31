@@ -14,11 +14,12 @@ public class HeaderManager{
 		String fName = f.getName();
 		String fLength = String.valueOf(f.length());
 
-		if(fName.length() > NAME_LENGTH )fName = fName.substring(0, NAME_LENGTH);
+		if(fName.length() > NAME_LENGTH)fName = fName.substring(0, NAME_LENGTH);
 
-		while( fName.length() < NAME_LENGTH )fName = FILLER + fName;
-
-		while( fLength.length() < SIZE_LENGTH )fLength = FILLER + fLength;
+//		string buffer
+		while(fName.length() < NAME_LENGTH)fName = FILLER + fName;
+//		string buffer
+		while(fLength.length() < SIZE_LENGTH)fLength = FILLER + fLength;
 
 		return fName+DISCRIMINATOR+fLength;
 	}
@@ -50,11 +51,11 @@ public class HeaderManager{
 	}
 
 	public static String getName(String header){
-		return ((header.substring(0,(header.indexOf(DISCRIMINATOR)))).replaceAll("_"," ")).trim();
+		return ((header.substring(0,(header.indexOf(DISCRIMINATOR)))).replaceAll(String.valueOf(HeaderManager.FILLER)," ")).trim();
 	}
 
 	public static int getLength(String header){
-		return Integer.parseInt(((header.substring((header.indexOf(DISCRIMINATOR)+1))).replaceAll("_"," ")).trim());
+		return Integer.parseInt(((header.substring((header.indexOf(DISCRIMINATOR)+1))).replaceAll(String.valueOf(HeaderManager.FILLER)," ")).trim());
 	}
 
 	public static int getHeaderLength(){

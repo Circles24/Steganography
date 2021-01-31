@@ -37,7 +37,6 @@ class Embedder {
 
 		n = k = x = y = 0;
 
-		System.out.println("Header Length :: "+HeaderManager.getHeader(outFile).length());
 		byte[] headerBytes =  HeaderManager.getHeader(msgFile).getBytes();
 		n = headerBytes.length;
 
@@ -47,13 +46,13 @@ class Embedder {
 		int vesselWidth = vesselImage.getWidth();
    		int vesselHeight = vesselImage.getHeight();
 
-   		if(vesselHeight*vesselWidth < msgFile.length()+HeaderManager.getHeaderLength())throw new Exception("insufficient Size");
+   		if(vesselHeight*vesselWidth < msgFile.length()+n)throw new Exception("insufficient Size");
    		System.out.println("Vessel Capacity :: "+vesselHeight*vesselWidth);
    		System.out.println("Data File Size :: "+msgFile.length());
+		System.out.println("Header Bytes Length :: "+n);
 
    		WritableRaster raster = vesselImage.getRaster();
 
-   		System.out.println("Header Bytes Length :: "+n);
    		for( x=0; x < vesselWidth; x++ ){
    			for( y=0; y < vesselHeight; y++ ){
 
@@ -66,10 +65,10 @@ class Embedder {
 
    				updatedBytes = ByteManager.embedAlienData(
    						headerBytes[k++],
-						new int[]{raster.getSample(x, y,0),raster.getSample(x, y,1),raster.getSample(x,y,2)});
-   				raster.setSample(x,y,0,updatedBytes[0]);
-				raster.setSample(x,y,1,updatedBytes[1]);
-				raster.setSample(x,y,2,updatedBytes[2]);
+						new int[]{raster.getSample(x, y,0), raster.getSample(x, y,1), raster.getSample(x, y,2)});
+   				raster.setSample(x, y,0, updatedBytes[0]);
+				raster.setSample(x, y,1, updatedBytes[1]);
+				raster.setSample(x, y,2, updatedBytes[2]);
 
    			}
    			if(finished)break;
@@ -78,7 +77,7 @@ class Embedder {
    		finished = false;
    		k = n = 0;
 
-   		System.out.println("Embedding starts at "+x+" "+y);
+   		System.out.println("Main body embedding starts at "+x+" "+y);
         for (int i = x; i < vesselWidth; i++) {
             for (int j = y; j < vesselHeight; j++) {
 				
@@ -95,9 +94,9 @@ class Embedder {
 				updatedBytes = ByteManager.embedAlienData(
 						buff[k++],
 						new int[]{raster.getSample(i, j,0), raster.getSample(i, j,1), raster.getSample(i, j,2)});
-				raster.setSample(i,j,0,updatedBytes[0]);
-				raster.setSample(i,j,1,updatedBytes[1]);
-				raster.setSample(i,j,2,updatedBytes[2]);
+				raster.setSample(i, j,0, updatedBytes[0]);
+				raster.setSample(i, j,1, updatedBytes[1]);
+				raster.setSample(i, j,2, updatedBytes[2]);
             }
 
             if(finished)break;
